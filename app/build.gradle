@@ -33,4 +33,7 @@ dependencies {
     implementation 'com.android.support:design:26.1.0'
     implementation(name: 'library_cycleviewpager-release', ext: 'aar')
     implementation 'com.android.support:recyclerview-v7:26.1.0'
+    implementation 'cn.bmob.android:bmob-sdk:3.5.5'
+    //如果你想应用能够兼容Android6.0，请添加此依赖(org.apache.http.legacy.jar)
+    implementation 'cn.bmob.android:http-legacy:1.0'
 }
