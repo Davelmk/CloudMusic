@@ -1,17 +1,36 @@
 package com.dave.cloudmusic.PlayView;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.dave.cloudmusic.Bean.Song;
+import com.dave.cloudmusic.MusicList.MusicListActivity;
 import com.dave.cloudmusic.R;
+import com.dave.cloudmusic.Utils.BlurUtil;
+import com.dave.cloudmusic.Utils.MergeImageUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,36 +41,106 @@ import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
 
 public class MusicPlayActivity extends AppCompatActivity {
-    private Button btn_stop_play;
-    private Button btn_restart_play;
     private int postion;
     private List<Song> songList;
     MyHandler myHandler = null;
 
     private MediaPlayer mediaPlayer;
 
+    private Toolbar toolbar;
+    private ImageView image_dic;
+    private LinearLayout linearLayout;
+
+    private ObjectAnimator animator;
+
+    private ImageView play;
+    private ImageView next_song;
+    private ImageView last_song;
+    private ImageView play_needle;
+    private boolean isPlaying;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_play);
+        toolbar=findViewById(R.id.toolBar_play);
+        setSupportActionBar(toolbar);
+        final ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle("Name");
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setHomeAsUpIndicator(R.mipmap.back);
+        }
+
         Intent intent=getIntent();
         postion=intent.getIntExtra("position",0);
         myHandler=new MyHandler();
         initData();
-        btn_stop_play=findViewById(R.id.btn_stop_play);
-        btn_stop_play.setOnClickListener(new View.OnClickListener() {
+
+        image_dic=findViewById(R.id.image_dic);
+        Bitmap discBitmap= BitmapFactory.decodeResource(this.getResources(),R.drawable.dic);
+        Bitmap albumBitmap= BitmapFactory.decodeResource(this.getResources(),R.drawable.album);
+        Bitmap bmp= MergeImageUtil.mergeThumbnailBitmap(discBitmap,albumBitmap);
+        image_dic.setImageBitmap(bmp);
+        Bitmap bgbm = BlurUtil.doBlur(albumBitmap,5,10);
+        linearLayout=findViewById(R.id.layout_play);
+        Drawable drawable=new BitmapDrawable(bgbm);
+        linearLayout.setBackground(drawable);
+
+        animator=ObjectAnimator.ofFloat(image_dic,
+                "rotation", 0f, 360.0f);
+        animator.setDuration(10000);
+        animator.setRepeatCount(-1);
+        animator.setRepeatMode(ValueAnimator.RESTART);
+        animator.setInterpolator(new LinearInterpolator());
+
+
+        play=findViewById(R.id.play);
+        play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.pause();
+                if(isPlaying){
+                    mediaPlayer.pause();
+                    animator.pause();
+                    play.setImageResource(R.drawable.stop_play);
+                    RotateAnimation rotateAnimation=new RotateAnimation(0f,-45.0f,
+                            Animation.RELATIVE_TO_SELF,0.25f,
+                            Animation.RELATIVE_TO_SELF,0f);
+                    rotateAnimation.setDuration(1000);
+                    rotateAnimation.setFillAfter(true);
+                    play_needle.startAnimation(rotateAnimation);
+                    isPlaying=false;
+                }else {
+                    mediaPlayer.start();
+                    animator.resume();
+                    play.setImageResource(R.drawable.start_play);
+                    RotateAnimation rotateAnimation=new RotateAnimation(-45.0f,0f,
+                            Animation.RELATIVE_TO_SELF,0.25f,
+                            Animation.RELATIVE_TO_SELF,0f);
+                    rotateAnimation.setDuration(1000);
+                    rotateAnimation.setFillAfter(true);
+                    play_needle.startAnimation(rotateAnimation);
+                    isPlaying=true;
+                }
             }
         });
-        btn_restart_play=findViewById(R.id.btn_restart_play);
-        btn_restart_play.setOnClickListener(new View.OnClickListener() {
+        next_song=findViewById(R.id.next_song);
+        next_song.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mediaPlayer.start();
+                Toast.makeText(MusicPlayActivity.this,
+                        "下一首",Toast.LENGTH_SHORT).show();
             }
         });
+        last_song=findViewById(R.id.last_song);
+        last_song.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MusicPlayActivity.this,
+                        "上一首",Toast.LENGTH_SHORT).show();
+            }
+        });
+        play_needle=findViewById(R.id.play_needle);
     }
 
     //歌单数据初始化
@@ -83,12 +172,39 @@ public class MusicPlayActivity extends AppCompatActivity {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mediaPlayer.start();
+                    isPlaying=true;
+                    animator.start();
+                    play.setImageResource(R.drawable.start_play);
                 }
             });
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.search:
+                Toast.makeText(MusicPlayActivity.this, "返回",
+                        Toast.LENGTH_SHORT).show();
+                /*startActivity(new Intent(MusicPlayActivity.this,
+                        MusicListActivity.class));*/
+                break;
+            default:
+                break;
+        }
+        return true;
+    }
+
     class MyHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
