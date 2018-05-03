@@ -1,11 +1,14 @@
 package com.dave.cloudmusic.MusicList;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,6 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.bmob.v3.Bmob;
+import cn.bmob.v3.BmobQuery;
+import cn.bmob.v3.exception.BmobException;
+import cn.bmob.v3.listener.FindListener;
 
 public class MusicListActivity extends AppCompatActivity {
     private Toolbar toolbar;
@@ -35,6 +41,8 @@ public class MusicListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
     private List<Song> songList;
+
+    MyHandler myHandler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,8 +75,32 @@ public class MusicListActivity extends AppCompatActivity {
             }
         });
 
+        //获取歌单数据
+        myHandler=new MyHandler();
+        initData();
+    }
+
+    //歌单数据初始化
+    private void initData(){
+        songList=new ArrayList<>();
+        BmobQuery<Song> query=new BmobQuery<>();
+        query.findObjects(new FindListener<Song>() {
+            @Override
+            public void done(List<Song> object, BmobException e) {
+                if (e == null) {
+                    for (Song song : object) {
+                        songList.add(new Song(song.getName(),song.getUrl()));
+                    }
+                    myHandler.sendEmptyMessage(0);
+                } else {
+                    Log.e("bmob", "失败：" + e.getMessage() + "," + e.getErrorCode());
+                }
+            }
+        });
+    }
+    private void initMusicList(){
+        Log.d("dave",songList.size()+"");
         //加载歌单
-        initMusicList();
         recyclerView=findViewById(R.id.recyclerView);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -76,15 +108,20 @@ public class MusicListActivity extends AppCompatActivity {
         recyclerView.setAdapter(myAdapter);
     }
 
-    //歌单数据初始化
-    private void initMusicList(){
-        songList=new ArrayList<>();
-        songList.add(new Song("韩安旭 - 多幸运",""));
-        songList.add(new Song("G.E.M.邓紫棋 - 光年之外",""));
-        songList.add(new Song("曲肖冰 - 离人愁",""));
+    class MyHandler extends Handler {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case 0:
+                    initMusicList();
+                    break;
+                default:
+                    Log.e("dave","消息出错...");
+                    break;
+            }
+            super.handleMessage(msg);
+        }
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

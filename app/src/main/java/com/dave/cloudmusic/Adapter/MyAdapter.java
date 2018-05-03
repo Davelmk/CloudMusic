@@ -1,6 +1,7 @@
 package com.dave.cloudmusic.Adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dave.cloudmusic.Bean.Song;
+import com.dave.cloudmusic.PlayView.MusicPlayActivity;
 import com.dave.cloudmusic.R;
 
 import java.util.List;
@@ -40,6 +42,9 @@ public class MyAdapter  extends RecyclerView.Adapter <MyAdapter.ViewHolder>{
             public void onClick(View v) {
                 Toast.makeText(mContext,songsList.get(position).getName(),
                         Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent(mContext, MusicPlayActivity.class);
+                intent.putExtra("position",position);
+                mContext.startActivity(intent);
             }
         });
         holder.item_more.setOnClickListener(new View.OnClickListener() {
