@@ -19,7 +19,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -27,7 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.dave.cloudmusic.Bean.Song;
-import com.dave.cloudmusic.MusicList.MusicListActivity;
 import com.dave.cloudmusic.R;
 import com.dave.cloudmusic.Utils.BlurUtil;
 import com.dave.cloudmusic.Utils.MergeImageUtil;
@@ -82,7 +80,8 @@ public class MusicPlayActivity extends AppCompatActivity {
         Bitmap albumBitmap= BitmapFactory.decodeResource(this.getResources(),R.drawable.album);
         Bitmap bmp= MergeImageUtil.mergeThumbnailBitmap(discBitmap,albumBitmap);
         image_dic.setImageBitmap(bmp);
-        Bitmap bgbm = BlurUtil.doBlur(albumBitmap,5,10);
+        //Bitmap bgbm = BlurUtil.startBlur(albumBitmap,8,false);
+        Bitmap bgbm = BlurUtil.doBlur(albumBitmap,7,100);
         linearLayout=findViewById(R.id.layout_play);
         Drawable drawable=new BitmapDrawable(bgbm);
         linearLayout.setBackground(drawable);
