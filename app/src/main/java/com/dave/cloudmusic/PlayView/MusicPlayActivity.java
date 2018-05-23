@@ -102,7 +102,7 @@ public class MusicPlayActivity extends AppCompatActivity {
                     mediaPlayer.pause();
                     animator.pause();
                     play.setImageResource(R.drawable.stop_play);
-                    RotateAnimation rotateAnimation=new RotateAnimation(0f,-45.0f,
+                    RotateAnimation rotateAnimation=new RotateAnimation(0f,-30.0f,
                             Animation.RELATIVE_TO_SELF,0.25f,
                             Animation.RELATIVE_TO_SELF,0f);
                     rotateAnimation.setDuration(1000);
@@ -113,7 +113,7 @@ public class MusicPlayActivity extends AppCompatActivity {
                     mediaPlayer.start();
                     animator.resume();
                     play.setImageResource(R.drawable.start_play);
-                    RotateAnimation rotateAnimation=new RotateAnimation(-45.0f,0f,
+                    RotateAnimation rotateAnimation=new RotateAnimation(-30.0f,0f,
                             Animation.RELATIVE_TO_SELF,0.25f,
                             Animation.RELATIVE_TO_SELF,0f);
                     rotateAnimation.setDuration(1000);
@@ -176,6 +176,13 @@ public class MusicPlayActivity extends AppCompatActivity {
                     play.setImageResource(R.drawable.start_play);
                 }
             });
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    mediaPlayer.reset();
+                    mediaPlayer.start();
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -191,12 +198,6 @@ public class MusicPlayActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 finish();
-                break;
-            case R.id.search:
-                Toast.makeText(MusicPlayActivity.this, "返回",
-                        Toast.LENGTH_SHORT).show();
-                /*startActivity(new Intent(MusicPlayActivity.this,
-                        MusicListActivity.class));*/
                 break;
             default:
                 break;

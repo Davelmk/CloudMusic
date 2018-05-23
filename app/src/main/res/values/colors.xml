@@ -8,4 +8,5 @@
     <color name="colorPointSelected">#D93E35</color>
     <color name="colorPointUnselected">#FFFFFF</color>
     <color name="colorSplitLine">#64000000</color>
+    <color name="colorTitleText">#c8eae6e6</color>
 </resources>

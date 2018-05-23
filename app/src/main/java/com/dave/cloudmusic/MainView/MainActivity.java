@@ -20,7 +20,7 @@ import com.dave.cloudmusic.MusicList.MusicListActivity;
 import com.dave.cloudmusic.R;
 import com.wpy.circleviewpager.widget.CycleView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     //抽屉布局
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
@@ -29,6 +29,12 @@ public class MainActivity extends AppCompatActivity {
     //轮播图
     private CycleView cycleView;
     private int[] imgs;
+
+    //私人FM，每日推荐，歌单，排行榜
+    private ImageView myFM;
+    private ImageView suggestion;
+    private ImageView music_list;
+    private ImageView ranking;
 
     //歌单
     private LinearLayout myList;
@@ -48,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.mipmap.drawer);
         }
-        navigationView=findViewById(R.id.navigation);
+        navigationView = findViewById(R.id.navigation);
         navigationView.setNavigationItemSelectedListener(new NavigationView.
                 OnNavigationItemSelectedListener() {
             @Override
@@ -81,38 +87,37 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //添加轮播图
-        cycleView=findViewById(R.id.banner);
-        imgs=new int[]{R.drawable.banner1,R.drawable.banner2,
-            R.drawable.banner3,R.drawable.banner4,R.drawable.banner5};
+        cycleView = findViewById(R.id.banner);
+        imgs = new int[]{R.drawable.banner1, R.drawable.banner2,
+                R.drawable.banner3, R.drawable.banner4, R.drawable.banner5};
         cycleView.setItems(imgs, getSupportFragmentManager(), new CycleView.OnItemClickListener() {
             @Override
             public void onItemClick(int i) {
                 Toast.makeText(MainActivity.this, "未设置响应事件",
                         Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onLoadImage(ImageView imageView, String s) {
 
             }
         });
 
-        //歌单点击事件
-        myList=findViewById(R.id.my_music_list);
-        recommendList=findViewById(R.id.recommend_list);
-        myList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent=new Intent(MainActivity.this, MusicListActivity.class);
-                startActivity(intent);
-            }
-        });
-        recommendList.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "暂无推荐",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+        //私人FM，每日推荐，歌单，排行榜
+        myFM = findViewById(R.id.myFM);
+        myFM.setOnClickListener(this);
+        suggestion = findViewById(R.id.suggestion);
+        suggestion.setOnClickListener(this);
+        music_list = findViewById(R.id.music_list);
+        music_list.setOnClickListener(this);
+        ranking = findViewById(R.id.ranking);
+        ranking.setOnClickListener(this);
+
+        //歌单,点击事件
+        myList = findViewById(R.id.my_music_list);
+        recommendList = findViewById(R.id.recommend_list);
+        myList.setOnClickListener(this);
+        recommendList.setOnClickListener(this);
     }
 
     @Override
@@ -135,5 +140,36 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu, menu);
         return true;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.myFM:
+                Toast.makeText(MainActivity.this, "私人FM",
+                        Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.suggestion:
+                Toast.makeText(MainActivity.this, "每日推荐",
+                        Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.music_list:
+                Toast.makeText(MainActivity.this, "歌单",
+                        Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.ranking:Toast.makeText(MainActivity.this, "排行榜",
+                    Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.recommend_list:
+                Toast.makeText(MainActivity.this, "暂无推荐",
+                        Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.my_music_list:
+                Intent intent = new Intent(MainActivity.this, MusicListActivity.class);
+                startActivity(intent);
+                break;
+            default:
+                break;
+        }
     }
 }
