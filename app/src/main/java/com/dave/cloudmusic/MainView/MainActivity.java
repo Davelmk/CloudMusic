@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.dave.cloudmusic.MusicList.MusicListActivity;
 import com.dave.cloudmusic.R;
+import com.dave.cloudmusic.SearchView.SearchActivity;
 import com.wpy.circleviewpager.widget.CycleView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
@@ -134,8 +135,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 drawerLayout.openDrawer(GravityCompat.START);
                 break;
             case R.id.search:
-                Toast.makeText(MainActivity.this, item.getTitle(),
-                        Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent(MainActivity.this, SearchActivity.class);
+                startActivityForResult(intent,1);
                 break;
             default:
                 break;

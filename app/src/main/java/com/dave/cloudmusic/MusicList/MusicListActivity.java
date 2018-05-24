@@ -1,6 +1,7 @@
 package com.dave.cloudmusic.MusicList;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,11 +19,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.dave.cloudmusic.Adapter.MyAdapter;
 import com.dave.cloudmusic.Bean.Song;
-import com.dave.cloudmusic.R;
+import com.dave.cloudmusic.SearchView.SearchListActivity;
 import com.dave.cloudmusic.Utils.DataBaseHelper;
 
 import java.util.ArrayList;
@@ -32,6 +32,8 @@ import cn.bmob.v3.Bmob;
 import cn.bmob.v3.BmobQuery;
 import cn.bmob.v3.exception.BmobException;
 import cn.bmob.v3.listener.FindListener;
+
+import com.dave.cloudmusic.R;
 
 public class MusicListActivity extends AppCompatActivity {
     private Toolbar toolbar;
@@ -93,9 +95,11 @@ public class MusicListActivity extends AppCompatActivity {
         myHandler=new MyHandler();
         if(needGetDataFromCloud){
             //从云端获取数据
+            Log.d("dave","从云端获取数据");
             initDataFromCloud();
         }else {
             //直接加载数据库内容
+            Log.d("dave","直接加载数据库内容");
             initMusicListFromSQL();
         }
     }
@@ -199,8 +203,8 @@ public class MusicListActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.search:
-                Toast.makeText(MusicListActivity.this, item.getTitle(),
-                        Toast.LENGTH_SHORT).show();
+                Intent intent=new Intent(MusicListActivity.this, SearchListActivity.class);
+                startActivityForResult(intent,1);
                 break;
             default:
                 break;

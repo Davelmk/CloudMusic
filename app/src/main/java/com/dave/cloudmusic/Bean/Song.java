@@ -15,6 +15,10 @@ public class Song extends BmobObject{
         this.url=url;
         this.picture=picture;
     }
+    public Song(String id,String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public String getId() {
         return id;
