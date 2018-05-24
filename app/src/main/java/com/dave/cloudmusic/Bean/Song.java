@@ -6,22 +6,18 @@ import cn.bmob.v3.datatype.BmobFile;
 public class Song extends BmobObject{
     private String name;
     private String url;
+    private String picture;
     private BmobFile songFile;
     private transient String id;
-
-    public Song(String name, String url, String id) {
-        this.name = name;
-        this.url = url;
+    public Song(String id,String name,String url,String picture) {
         this.id = id;
+        this.name = name;
+        this.url=url;
+        this.picture=picture;
     }
 
     public String getId() {
         return id;
-    }
-
-    public Song(String name, String url) {
-        this.name = name;
-        this.url = url;
     }
 
     public String getName() {
@@ -30,6 +26,14 @@ public class Song extends BmobObject{
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getPicture() {
+        return picture;
+    }
+
+    public void setPicture(String picture) {
+        this.picture = picture;
     }
 
     public String getUrl() {

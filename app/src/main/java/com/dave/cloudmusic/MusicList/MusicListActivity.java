@@ -1,5 +1,9 @@
 package com.dave.cloudmusic.MusicList;
 
+import android.content.ContentValues;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
@@ -19,6 +23,7 @@ import android.widget.Toast;
 import com.dave.cloudmusic.Adapter.MyAdapter;
 import com.dave.cloudmusic.Bean.Song;
 import com.dave.cloudmusic.R;
+import com.dave.cloudmusic.Utils.DataBaseHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +36,11 @@ import cn.bmob.v3.listener.FindListener;
 public class MusicListActivity extends AppCompatActivity {
     private Toolbar toolbar;
 
+    //是否进行从云端数据填充
+    private boolean needGetDataFromCloud;
+    //SQLite
+    private SQLiteDatabase db;
+
     //底部播放栏
     private ImageView song_icon;
     private TextView song_name;
@@ -40,7 +50,7 @@ public class MusicListActivity extends AppCompatActivity {
     //歌单List
     private RecyclerView recyclerView;
     private MyAdapter myAdapter;
-    private List<Song> songList;
+    private List<Song> songList=new ArrayList<>();
 
     MyHandler myHandler = null;
 
@@ -50,7 +60,7 @@ public class MusicListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_music_list);
         //初始化bmob
         Bmob.initialize(this,"60ab95fd51a8da2ba14d5d044f58e17f");
-
+        //toolBar
         toolbar = findViewById(R.id.toolbar_list);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
@@ -59,6 +69,10 @@ public class MusicListActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
             actionBar.setHomeAsUpIndicator(R.mipmap.back);
         }
+
+        //获取状态
+        SharedPreferences sharedPreferences=getSharedPreferences("data",MODE_PRIVATE);
+        needGetDataFromCloud=sharedPreferences.getBoolean("needGetDataFromCloud",false);
 
         //底部播放栏相关事件
         song_icon=findViewById(R.id.play_icon);
@@ -77,19 +91,26 @@ public class MusicListActivity extends AppCompatActivity {
 
         //获取歌单数据
         myHandler=new MyHandler();
-        initData();
+        if(needGetDataFromCloud){
+            //从云端获取数据
+            initDataFromCloud();
+        }else {
+            //直接加载数据库内容
+            initMusicListFromSQL();
+        }
     }
 
     //歌单数据初始化
-    private void initData(){
-        songList=new ArrayList<>();
+    private void initDataFromCloud(){
+        songList.clear();
         BmobQuery<Song> query=new BmobQuery<>();
         query.findObjects(new FindListener<Song>() {
             @Override
             public void done(List<Song> object, BmobException e) {
                 if (e == null) {
                     for (Song song : object) {
-                        songList.add(new Song(song.getName(),song.getUrl()));
+                        songList.add(new Song(song.getObjectId(),song.getName()
+                                ,song.getUrl(),song.getPicture()));
                     }
                     myHandler.sendEmptyMessage(0);
                 } else {
@@ -107,6 +128,47 @@ public class MusicListActivity extends AppCompatActivity {
         myAdapter=new MyAdapter(this,songList);
         recyclerView.setAdapter(myAdapter);
     }
+    private void initDataBase(){
+        //清空DB
+        cleanDataBase();
+        //写入数据库
+        DataBaseHelper dbHelper = new DataBaseHelper(this, "Music.db", null, 1);
+        db = dbHelper.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        for (Song song:songList){
+            cv.put("id", song.getId());
+            cv.put("name", song.getName());
+            cv.put("url", song.getUrl());
+            cv.put("picture",song.getPicture());
+            db.insert("songList", null, cv);
+            cv.clear();
+        }
+        Log.d("dave","写入数据库");
+    }
+    public void cleanDataBase(){
+        DataBaseHelper dbHelper = new DataBaseHelper(this, "Music.db", null, 1);
+        db = dbHelper.getWritableDatabase();
+        db.delete("songList",null,null);
+    }
+    private void initMusicListFromSQL(){
+        songList.clear();
+        //从数据库加载数据
+        DataBaseHelper dbHelper = new DataBaseHelper(this, "Music.db", null, 1);
+        db = dbHelper.getReadableDatabase();
+        Cursor cursor = db.query("songList", null, null,
+                null, null, null, null);
+        if (cursor.moveToFirst()) {
+            do {
+                String name = cursor.getString(cursor.getColumnIndex("name"));
+                String id = cursor.getString(cursor.getColumnIndex("id"));
+                String url = cursor.getString(cursor.getColumnIndex("url"));
+                String picture = cursor.getString(cursor.getColumnIndex("picture"));
+                songList.add(new Song(id,name,url,picture));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
+        initMusicList();
+    }
 
     class MyHandler extends Handler {
         @Override
@@ -114,6 +176,7 @@ public class MusicListActivity extends AppCompatActivity {
             switch (msg.what) {
                 case 0:
                     initMusicList();
+                    initDataBase();
                     break;
                 default:
                     Log.e("dave","消息出错...");

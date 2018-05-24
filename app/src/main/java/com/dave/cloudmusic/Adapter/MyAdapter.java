@@ -43,7 +43,7 @@ public class MyAdapter  extends RecyclerView.Adapter <MyAdapter.ViewHolder>{
                 Toast.makeText(mContext,songsList.get(position).getName(),
                         Toast.LENGTH_SHORT).show();
                 Intent intent=new Intent(mContext, MusicPlayActivity.class);
-                intent.putExtra("position",position);
+                intent.putExtra("playNow",songsList.get(position).getId());
                 mContext.startActivity(intent);
             }
         });

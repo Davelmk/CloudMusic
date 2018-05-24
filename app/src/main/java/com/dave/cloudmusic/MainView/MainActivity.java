@@ -1,6 +1,7 @@
 package com.dave.cloudmusic.MainView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -118,6 +119,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recommendList = findViewById(R.id.recommend_list);
         myList.setOnClickListener(this);
         recommendList.setOnClickListener(this);
+
+        //设置默认MusicList加载方式
+        SharedPreferences sharedPreferences=getSharedPreferences("data",MODE_PRIVATE);
+        SharedPreferences.Editor editor=sharedPreferences.edit();
+        editor.putBoolean("needGetDataFromCloud",true);
+        editor.commit();
     }
 
     @Override
