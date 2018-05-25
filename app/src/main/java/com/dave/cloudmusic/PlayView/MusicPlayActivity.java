@@ -12,6 +12,7 @@ import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,7 +29,6 @@ import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.dave.cloudmusic.Bean.Song;
-import com.dave.cloudmusic.MainView.MainActivity;
 import com.dave.cloudmusic.R;
 import com.dave.cloudmusic.Utils.BlurUtil;
 import com.dave.cloudmusic.Utils.DataBaseHelper;
@@ -45,13 +45,15 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.dave.cloudmusic.MusicList.MusicListActivity.isPlaying;
+
 public class MusicPlayActivity extends AppCompatActivity implements View.OnClickListener{
     private String playNow;
-    private int position;
+    public static int position;
     private List<Song> songList;
     //SQLite
     private SQLiteDatabase db;
-    private MediaPlayer mediaPlayer;
+    public static  MediaPlayer mediaPlayer;
 
     private Toolbar toolbar;
     private ActionBar actionBar;
@@ -71,16 +73,18 @@ public class MusicPlayActivity extends AppCompatActivity implements View.OnClick
     private ImageView comment;
     private ImageView more_action;
 
-    private boolean isPlaying;
-
     MyHandler myHandler = null;
     private Bitmap albumBitmap;
+
+    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_music_play);
 
+        //本地广播实例化
+        localBroadcastManager=LocalBroadcastManager.getInstance(this);
         //获取歌曲列表
         initData();
 
@@ -138,6 +142,20 @@ public class MusicPlayActivity extends AppCompatActivity implements View.OnClick
         comment.setOnClickListener(this);
         more_action=findViewById(R.id.more_action);
         more_action.setOnClickListener(this);
+
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                position=(position+1)%songList.size();
+                actionBar.setTitle(songList.get(position).getName());
+                setDefaultPicture();
+                getImageFromNet();
+                initPicture();
+                playSong(position);
+                Intent i=new Intent("LocalBroadCast");
+                localBroadcastManager.sendBroadcast(i);
+            }
+        });
 
     }
 
@@ -273,6 +291,8 @@ public class MusicPlayActivity extends AppCompatActivity implements View.OnClick
         getImageFromNet();
         initPicture();
         playSong(position);
+        Intent i=new Intent("LocalBroadCast");
+        localBroadcastManager.sendBroadcast(i);
     }
     private void lastSongAction(){
         mediaPlayer.stop();
@@ -286,6 +306,8 @@ public class MusicPlayActivity extends AppCompatActivity implements View.OnClick
         getImageFromNet();
         initPicture();
         playSong(position);
+        Intent i=new Intent("LocalBroadCast");
+        localBroadcastManager.sendBroadcast(i);
     }
 
     @Override
@@ -297,7 +319,8 @@ public class MusicPlayActivity extends AppCompatActivity implements View.OnClick
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                finish();
+                moveTaskToBack(true);
+                //finish();
                 break;
             default:
                 break;

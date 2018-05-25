@@ -11,7 +11,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/launcher_icon"
+        android:icon="@mipmap/launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
@@ -24,7 +24,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".MusicList.MusicListActivity" />
-        <activity android:name=".PlayView.MusicPlayActivity" />
+        <activity
+            android:name=".PlayView.MusicPlayActivity"
+            android:launchMode="singleInstance"/>
         <activity android:name=".SearchView.SearchActivity" />
         <activity android:name=".SearchView.SearchListActivity"></activity>
     </application>

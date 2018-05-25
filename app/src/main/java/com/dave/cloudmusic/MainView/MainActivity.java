@@ -121,7 +121,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         myList.setOnClickListener(this);
         recommendList.setOnClickListener(this);
 
-        //设置默认MusicList加载方式
+        //设置默认MusicList加载方式，本地SQL或者Bomb云加载
+        //网易云API挂了，搜索没写，云端数据不会更新
+        //只能设置云端加载
         SharedPreferences sharedPreferences=getSharedPreferences("data",MODE_PRIVATE);
         SharedPreferences.Editor editor=sharedPreferences.edit();
         editor.putBoolean("needGetDataFromCloud",true);

@@ -9,7 +9,10 @@ public class Song extends BmobObject{
     private String picture;
     private BmobFile songFile;
     private transient String id;
-    public Song(String id,String name,String url,String picture) {
+
+    public Song() {}
+
+    public Song(String id, String name, String url, String picture) {
         this.id = id;
         this.name = name;
         this.url=url;
