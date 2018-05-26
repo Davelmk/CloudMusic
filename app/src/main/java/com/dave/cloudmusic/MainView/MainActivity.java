@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import com.dave.cloudmusic.MusicList.MusicListActivity;
 import com.dave.cloudmusic.R;
+import com.dave.cloudmusic.RecommendList.RecommendActivity;
 import com.dave.cloudmusic.SearchView.SearchActivity;
 import com.wpy.circleviewpager.widget.CycleView;
 
@@ -120,14 +121,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         recommendList = findViewById(R.id.recommend_list);
         myList.setOnClickListener(this);
         recommendList.setOnClickListener(this);
-
-        //设置默认MusicList加载方式，本地SQL或者Bomb云加载
-        //网易云API挂了，搜索没写，云端数据不会更新
-        //只能设置云端加载
+        //设置默认MusicList加载方式，本地SQL加载
         SharedPreferences sharedPreferences=getSharedPreferences("data",MODE_PRIVATE);
         SharedPreferences.Editor editor=sharedPreferences.edit();
-        editor.putBoolean("needGetDataFromCloud",true);
+        editor.putBoolean("needGetDataFromCloud",false);
         editor.commit();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode==0){
+            //未收藏歌曲
+            //设置MusicList本地SQL加载
+            SharedPreferences sharedPreferences=getSharedPreferences("data",MODE_PRIVATE);
+            SharedPreferences.Editor editor=sharedPreferences.edit();
+            editor.putBoolean("needGetDataFromCloud",false);
+            editor.commit();
+        }else {
+            //设置MusicListBomb云加载
+            SharedPreferences sharedPreferences=getSharedPreferences("data",MODE_PRIVATE);
+            SharedPreferences.Editor editor=sharedPreferences.edit();
+            editor.putBoolean("needGetDataFromCloud",true);
+            editor.commit();
+        }
     }
 
     @Override
@@ -171,12 +187,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     Toast.LENGTH_SHORT).show();
                 break;
             case R.id.recommend_list:
-                Toast.makeText(MainActivity.this, "暂无推荐",
-                        Toast.LENGTH_SHORT).show();
+                Intent intent1=new Intent(MainActivity.this, RecommendActivity.class);
+                startActivity(intent1);
                 break;
             case R.id.my_music_list:
-                Intent intent = new Intent(MainActivity.this, MusicListActivity.class);
-                startActivity(intent);
+                Intent intent2 = new Intent(MainActivity.this, MusicListActivity.class);
+                startActivity(intent2);
                 break;
             default:
                 break;
